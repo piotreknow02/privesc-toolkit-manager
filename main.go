@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"privesc-toolkit-manager/downloader"
 	"privesc-toolkit-manager/pescriptlist"
 	"privesc-toolkit-manager/syscheck"
 	"privesc-toolkit-manager/types"
@@ -18,21 +19,29 @@ func main() {
 	fmt.Println("This tool is designed to help you find and download Privesc scripts")
 	fmt.Println("_________________________________")
 	currentSystem := syscheck.GetSystem()
+	currentArch := syscheck.GetArch()
 	fmt.Println("Your system is: ", types.GetSystemName(currentSystem))
 	ToolsSelect := promptui.Select{
 		Label: "Select Scripts to Download",
-		Items: types.GetNames(types.FilterBySystem(pescriptlist.PEScriptList, currentSystem)),
+		Items: types.GetNames(types.FilterBySystem(pescriptlist.PEScriptList, currentSystem, currentArch)),
 	}
-	_, Tools, err := ToolsSelect.Run()
-	if err == nil {
+	_, Tool, err := ToolsSelect.Run()
+	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
 	}
-	fmt.Println("Tools: ", Tools)
+	fmt.Println("You selected: ", Tool)
+	fmt.Println("Downloading...")
+	err = downloader.Download(pescriptlist.PEScriptList[pescriptlist.GetToolId(Tool)].Url)
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+	fmt.Println("Download complete!")
 }
 
 func banner() {
-	fmt.Println(`	/$$$$$$$           /$$                                                  
+	fmt.Println(`    /$$$$$$$           /$$                                                  
     | $$__  $$         |__/                                                  
     | $$  \ $$ /$$$$$$  /$$ /$$    /$$ /$$$$$$   /$$$$$$$  /$$$$$$$          
     | $$$$$$$//$$__  $$| $$|  $$  /$$//$$__  $$ /$$_____/ /$$_____/          

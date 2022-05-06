@@ -6,10 +6,18 @@ const (
 	Mac     = 2
 )
 
+const (
+	NoArch = 0
+	Amd64  = 1
+	Arm64  = 2
+	I386   = 3
+)
+
 type PEScript struct {
 	Name   string
 	Url    string
 	System int
+	Arch   int
 }
 
 func GetNames(p []PEScript) []string {
@@ -20,14 +28,14 @@ func GetNames(p []PEScript) []string {
 	return names
 }
 
-func (p PEScript) CheckSystem(systemId int) bool {
-	return p.System == systemId
+func (p PEScript) CheckSystem(systemId int, ArchId int) bool {
+	return p.System == systemId && (p.Arch == ArchId || p.Arch == NoArch)
 }
 
-func FilterBySystem(list []PEScript, currentSystem int) []PEScript {
+func FilterBySystem(list []PEScript, currentSystem int, currentArch int) []PEScript {
 	var filtered []PEScript
 	for _, v := range list {
-		if v.CheckSystem(currentSystem) {
+		if v.CheckSystem(currentSystem, currentArch) {
 			filtered = append(filtered, v)
 		}
 	}
